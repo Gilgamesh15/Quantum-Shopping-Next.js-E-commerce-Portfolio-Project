@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Product {
+  id String @id @default(uuid())
+
+  name   String
+  slug   String   @unique
+  images String[]
+
+  variants Variant[]
+}
+
+model Variant {
+  id String @id @default(uuid())
+
+  priceInCents  Int
+  images        String[]
+  amountInStock Int      @default(0)
+
+  product    Product             @relation(fields: [productId], references: [id])
+  properties VariantProperties[]
+  cartItems  CartItem[]
+
+  productId String
+}
+
+model Attribute {
+  id String @id @default(uuid())
+
+  name String
+
+  variantProperties VariantProperties[]
+  options           AttributeOption[]
+}
+
+model AttributeOption {
+  id String @id @default(uuid())
+
+  attribute         Attribute           @relation(fields: [attributeId], references: [id])
+  variantProperties VariantProperties[]
+
+  attributeId String
+}
+
+model VariantProperties {
+  id String @id @default(uuid())
+
+  variant   Variant         @relation(fields: [variantId], references: [id])
+  attribute Attribute       @relation(fields: [attributeId], references: [id])
+  option    AttributeOption @relation(fields: [optionId], references: [id])
+
+  attributeId String
+  optionId    String
+  variantId   String
+}
+
+model CartItem {
+  id String @id @default(uuid())
+
+  quantity Int @default(1)
+
+  variant Variant @relation(fields: [variantId], references: [id])
+  cart    Cart    @relation(fields: [cartId], references: [id])
+
+  variantId String
+  cartId    String
+}
+
+model Cart {
+  id String @id @default(uuid())
+
+  user      User?
+  cartItems CartItem[]
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  cart Cart @relation(fields: [cartId], references: [id])
+
+  cartId String @unique
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
