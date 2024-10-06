@@ -2,21 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-input[type="radio"] {
-  -webkit-appearance: none;
-  appearance: none;
-  background-color: #fff;
-  margin: 0;
-}
-
-.counter[data-isAnimating="false"] {
-  translate: 0px 0px;
-}
-.counter[data-isAnimating="true"] {
-  translate: 0px 32px;
-  transition: cubic-bezier(0.5, 0.25, 0.25, 0.5) 250ms;
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;

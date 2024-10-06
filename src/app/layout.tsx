@@ -1,8 +1,9 @@
-import QueryProvider from "@/components/QueryProvider";
+import { QueryProvider, ThemeProvider } from "@/components/Providers";
 import "./globals.css";
 
 import { auth } from "@/lib/auth";
 import { SessionProvider } from "next-auth/react";
+import SmoothScroll from "@/components/SmoothScroll";
 
 export default async function RootLayout({
   children,
@@ -14,7 +15,16 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`antialiased`}>
         <SessionProvider session={session}>
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+            </ThemeProvider>
+          </QueryProvider>
         </SessionProvider>
       </body>
     </html>
